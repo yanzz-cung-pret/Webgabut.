@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyMusic</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial;
+}
+
+body{
+    background:#121212;
+    color:white;
+    display:flex;
+    height:100vh;
+}
+
+/* Sidebar */
+.sidebar{
+    width:220px;
+    background:black;
+    padding:20px;
+}
+
+.logo{
+    color:#1db954;
+    font-size:28px;
+    font-weight:bold;
+    margin-bottom:30px;
+}
+
+.menu div{
+    padding:12px;
+    margin-bottom:10px;
+    cursor:pointer;
+    border-radius:10px;
+}
+
+.menu div:hover{
+    background:#1f1f1f;
+}
+
+/* Main */
+.main{
+    flex:1;
+    padding:20px;
+    overflow-y:auto;
+}
+
+.search-box{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:20px;
+    margin-bottom:20px;
+}
+
+/* Upload Button */
+.upload-btn{
+    background:#1db954;
+    padding:12px 20px;
+    display:inline-block;
+    border-radius:20px;
+    cursor:pointer;
+    margin-bottom:20px;
+}
+
+/* Song Cards */
+.albums{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:20px;
+}
+
+.card{
+    background:#181818;
+    padding:15px;
+    border-radius:15px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:scale(1.05);
+    background:#252525;
+}
+
+.card img{
+    width:100%;
+    height:180px;
+    object-fit:cover;
+    border-radius:10px;
+}
+
+.download-btn{
+    margin-top:10px;
+    width:100%;
+}
+
+/* Player */
+.player{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    background:#181818;
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+button{
+    background:#1db954;
+    border:none;
+    padding:10px 20px;
+    border-radius:20px;
+    color:white;
+    cursor:pointer;
+}
+
+/* Mobile */
+@media(max-width:768px){
+    .sidebar{
+        width:90px;
+        padding:10px;
+    }
+
+    .logo{
+        font-size:20px;
+    }
+
+    .menu div{
+        font-size:12px;
+    }
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="logo">MyMusic</div>
+
+    <div class="menu">
+        <div onclick="goHome()">Home</div>
+        <div onclick="focusSearch()">Search</div>
+    </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+    <!-- Search -->
+    <input 
+        type="text"
+        id="searchInput"
+        class="search-box"
+        placeholder="Search songs..."
+        onkeyup="searchSongs()"
+    >
+
+    <!-- Upload -->
+    <label class="upload-btn">
+        Upload MP3
+        <input type="file" id="uploadSong" accept="audio/*" hidden>
+    </label>
+
+    <h1>Trending Songs</h1>
+    <br>
+
+    <div class="albums" id="songList">
+
+        <!-- Lagu Default -->
+        <div class="card">
+            <img 
+            src="https://picsum.photos/300?music"
+            onclick="playSong(
+            'lagu gabut',
+            'tiktokio.com1777386318_k4XNuY2ReLzy2zwRTbbI.mp3'
+            )">
+
+            <h3>lagu gabut</h3>
+            <p>Custom Music</p>
+
+            <button 
+            class="download-btn"
+            onclick="downloadSong(
+            'tiktokio.com1777386318_k4XNuY2ReLzy2zwRTbbI.mp3'
+            )">
+            Download
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- Player -->
+<div class="player">
+    <div>
+        <h3 id="nowPlaying">No song selected</h3>
+    </div>
+
+    <button onclick="togglePlay()">Play / Pause</button>
+</div>
+
+<audio id="audioPlayer"></audio>
+
+<script>
+let audio = document.getElementById("audioPlayer");
+let songList = document.getElementById("songList");
+
+/* Play Song */
+function playSong(title, url){
+    audio.src = url;
+    audio.play();
+
+    document.getElementById("nowPlaying").innerText =
+    "Now Playing: " + title;
+}
+
+/* Play Pause */
+function togglePlay(){
+    if(audio.src === ""){
+        alert("Pilih lagu dulu");
+        return;
+    }
+
+    if(audio.paused){
+        audio.play();
+    }else{
+        audio.pause();
+    }
+}
+
+/* Search */
+function searchSongs(){
+    let input = document
+        .getElementById("searchInput")
+        .value
+        .toLowerCase();
+
+    let cards = document.querySelectorAll(".card");
+
+    cards.forEach(card=>{
+        let title = card.innerText.toLowerCase();
+
+        if(title.includes(input)){
+            card.style.display="block";
+        }else{
+            card.style.display="none";
+        }
+    });
+}
+
+/* Home */
+function goHome(){
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+}
+
+/* Focus Search */
+function focusSearch(){
+    document.getElementById("searchInput").focus();
+}
+
+/* Download */
+function downloadSong(url){
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+/* Upload Feature */
+document.getElementById("uploadSong").addEventListener("change", function(e){
+
+    let file = e.target.files[0];
+
+    if(file){
+        let songURL = URL.createObjectURL(file);
+        let songName = file.name.replace(".mp3","");
+
+        let card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
+            <img src="https://picsum.photos/300?random=${Math.random()}">
+            <h3>${songName}</h3>
+            <p>Uploaded Music</p>
+            <button class="download-btn">
+                Download
+            </button>
+        `;
+
+        card.querySelector("img").onclick = function(){
+            playSong(songName, songURL);
+        };
+
+        card.querySelector("button").onclick = function(){
+            downloadSong(songURL);
+        };
+
+        songList.appendChild(card);
+    }
+});
+</script>
+
+</body>
+</html>
